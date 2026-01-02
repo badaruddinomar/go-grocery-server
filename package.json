@@ -3,7 +3,18 @@
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "rm:dist": "rm -rf dist",
+    "build": "npm run rm:dist && tsc && npm run copy:prisma  && tsc-alias --verbose",
+    "start": "node ./dist/server.js",
+    "copy:prisma": "cpx \"src/generated/**/*\" dist/generated",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register ./src/server.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
+    "format:check": "prettier --check \"./src/**/*.+(js|ts|json)\"",
+    "swagger:generate": "ts-node ./src/docs/swagger.ts",
+    "postinstall": "prisma generate",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -36,6 +47,7 @@
     "zod": "^4.3.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/axios": "^0.9.36",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
@@ -43,11 +55,28 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
     "dotenv": "^17.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^17.0.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.6.1",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "prisma": "^7.2.0",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.51.0"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,json}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }
