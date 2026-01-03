@@ -11,6 +11,7 @@ import httpStatus from 'http-status';
 import sendResponse from '@/utils/sendResponse';
 import envConfig from '@/config/env.config';
 import { globalErrorHandler } from '@/middlewares/globalErrorHandler';
+import { schedulars } from '@/scehdulars';
 
 const app: Application = express();
 const corsOptions = {
@@ -28,6 +29,7 @@ app.use(cookieParser());
 app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }));
 app.set('trust proxy', 1);
 app.use(rateLimiter(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
+schedulars();
 
 // routes--
 app.get('/', (_req, res) => {
