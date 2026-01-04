@@ -1,4 +1,4 @@
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 // Extend globalThis with prisma property
 declare global {
   var prisma: PrismaClient | undefined;
