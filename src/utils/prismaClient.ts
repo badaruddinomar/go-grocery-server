@@ -1,19 +1,17 @@
-import { PrismaClient } from '@/generated/prisma/client';
-// Extend globalThis with prisma property
+import { PrismaClient } from '@prisma/client';
+
 declare global {
   var prisma: PrismaClient | undefined;
 }
 
-let prisma: PrismaClient;
-// Ensure only one instance of PrismaClient is created (Singleton Pattern)
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  // For development, re-use Prisma Client to prevent new instances on every hot reload
-  if (!global.prisma) {
-    global.prisma = new PrismaClient();
-  }
-  prisma = global.prisma;
+const prisma =
+  global.prisma ??
+  new PrismaClient({
+    log: ['error', 'warn'],
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
 }
 
-export { prisma };
+export default prisma;

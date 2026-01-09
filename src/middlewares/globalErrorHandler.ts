@@ -7,7 +7,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientInitializationError,
   PrismaClientValidationError,
-} from '@/generated/prisma/runtime/client';
+} from '@prisma/client/runtime/client';
 
 const handlePrismaError = (error: unknown): AppError => {
   let message = 'Database operation failed';
