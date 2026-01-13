@@ -11,8 +11,8 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "./",
     "typeRoots": ["./node_modules/@types", "./src/types"],
+    "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
       "@/generated/*": ["src/generated/*"]
