@@ -15,7 +15,7 @@ enum UserRole {
 }
 
 model User {
-  userId           BigInt        @id @default(autoincrement())
+  userId           Int        @id @default(autoincrement())
   email            String        @unique
   name             String 
   phone            String?         @unique

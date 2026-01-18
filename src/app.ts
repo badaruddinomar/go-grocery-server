@@ -12,6 +12,7 @@ import sendResponse from '@/utils/sendResponse';
 import envConfig from '@/config/env.config';
 import { globalErrorHandler } from '@/middlewares/globalErrorHandler';
 import { schedulars } from '@/scehdulars';
+import authRoutes from '@/modules/auth/auth.route';
 
 const app: Application = express();
 const corsOptions = {
@@ -35,7 +36,7 @@ schedulars();
 app.get('/', (_req, res) => {
   res.send('Hello World!');
 });
-// app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 // app.use('/api/v1/users', userRoutes);
 // Health check route
 app.get('/health', (_req: Request, res: Response) => {

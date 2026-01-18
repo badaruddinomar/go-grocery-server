@@ -2,7 +2,6 @@ import Redis from 'ioredis';
 import envConfig from '@/config/env.config';
 
 const redis = new Redis(envConfig.redis_url!, {
-  tls: {}, // required for Redis Cloud
   maxRetriesPerRequest: null,
   enableReadyCheck: true,
 });
