@@ -7,6 +7,7 @@ export default {
   port: process.env.PORT,
   database_URL: process.env.DATABASE_URL as string,
   direct_database_URL: process.env.DIRECT_DATABASE_URL as string,
+  redis_url: process.env.REDIS_URL as string,
   jwt_secret: process.env.JWT_SECRET as string,
   jwt_expiration: process.env.JWT_EXPIRATION,
   node_env: process.env.NODE_ENV,

@@ -18,4 +18,6 @@ export const registerSchema = {
     address: z.string().min(1, 'Address is required').trim().optional(),
   }),
 };
-export type RegisterSchema = z.infer<typeof registerSchema.body>;
+export type RegisterSchema = {
+  body: z.infer<typeof registerSchema.body>;
+};
