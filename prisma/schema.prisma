@@ -9,27 +9,29 @@ datasource db {
 
 enum UserRole {
   ADMIN
-  USER
+  SUPER_ADMIN
+  CUSTOMER
+  SUPPORT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  name        String
-  email       String   @unique
-  password    String
-  address     String?
-  phone       String?
-  role        UserRole @default(USER)
-  avatarUrl   String?
-  avatarUrlId String?
+  userId           BigInt        @id @default(autoincrement())
+  email            String        @unique
+  name             String 
+  phone            String?         @unique
+  address          String?
+  password         String 
+  role             UserRole @default(CUSTOMER)
+  status           UserStatus 
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
-  verifyCode       String?
-  isVerified       Boolean   @default(false)
-  verifyCodeExpire DateTime?
-
-  forgotPasswordCode       String?
-  forgotPasswordCodeExpire DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@index([phone,email])
 }
