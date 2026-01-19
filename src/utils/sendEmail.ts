@@ -1,7 +1,6 @@
 import envConfig from '@/config/env.config';
 import nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-
 interface IEmailOptions {
   reciverEmail: string;
   subject: string;

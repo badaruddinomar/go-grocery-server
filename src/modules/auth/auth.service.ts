@@ -6,52 +6,74 @@ import sendEmail from '@/utils/sendEmail';
 import { verifyEmailTemplate } from '@/templates/emailTemplates';
 import { RegisterSchema } from './auth.dto';
 import redis from '@/config/redis.config';
+import logger from '@/utils/logger';
 
 export const registerUserService = async (payload: RegisterSchema['body']) => {
   const { email, name, password, phone, address } = payload;
 
-  // 1. Check existing user
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
+  return await prisma.$transaction(async (tx) => {
+    // 1. Check existing user
+    const existingUser = await tx.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new AppError('User already exists', httpStatus.BAD_REQUEST);
+    }
+
+    // 2. Hash password
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
+
+    // 3. Create user
+    const user = await tx.user.create({
+      data: {
+        name,
+        email,
+        phone,
+        address,
+        password: hashedPassword,
+      },
+      omit: { password: true },
+    });
+
+    // 4. Generate verification code
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
+
+    // 5. Store code in Redis
+    const redisKey = `verify-email:${email}`;
+
+    try {
+      await redis.set(redisKey, verificationCode, 'EX', 60);
+    } catch (error) {
+      // ❌ Redis failed → rollback user creation
+      logger.error(`Failed to store verification code in Redis: ${error}`);
+      throw new AppError(
+        'Failed to store verification code',
+        httpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // 6. Send email
+    try {
+      await sendEmail({
+        reciverEmail: email,
+        subject: 'Verify your email',
+        body: verifyEmailTemplate(verificationCode),
+      });
+    } catch (error) {
+      // ❌ Email failed → rollback + cleanup Redis
+      logger.error(`Failed to send verification email: ${error}`);
+      await redis.del(redisKey);
+      throw new AppError(
+        'Failed to send verification email',
+        httpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    // 7. Everything succeeded
+    return user;
   });
-
-  if (existingUser) {
-    throw new AppError('User already exists', httpStatus.BAD_REQUEST);
-  }
-
-  // 2. Hash password
-  const salt = await bcryptjs.genSalt(10);
-  const hashedPassword = await bcryptjs.hash(password, salt);
-
-  // 3. Create user
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      phone,
-      address,
-      password: hashedPassword,
-    },
-    omit: { password: true },
-  });
-
-  // 4. Generate verification code
-  const verificationCode = Math.floor(
-    100000 + Math.random() * 900000,
-  ).toString();
-
-  // 5. Store code in Redis (TTL = 60 seconds)
-  const redisKey = `verify-email:${email}`;
-
-  await redis.set(redisKey, verificationCode, 'EX', 60); // 60 seconds expiration
-
-  // 6. Send email
-  await sendEmail({
-    reciverEmail: email,
-    subject: 'Verify your email',
-    body: verifyEmailTemplate(verificationCode),
-  });
-
-  // 7. Return the user data
-  return user;
 };
