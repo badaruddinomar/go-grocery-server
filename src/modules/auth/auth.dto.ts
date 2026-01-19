@@ -1,5 +1,6 @@
 import z from 'zod';
 
+// DTO for user registration
 export const registerSchema = {
   body: z.object({
     email: z
@@ -20,4 +21,21 @@ export const registerSchema = {
 };
 export type RegisterSchema = {
   body: z.infer<typeof registerSchema.body>;
+};
+
+// DTO for email verification
+export const verifyEmailSchema = {
+  body: z.object({
+    email: z
+      .email({ message: 'Invalid email format' })
+      .transform((val) => val.trim().toLowerCase()),
+    code: z
+      .string()
+      .length(6, 'Verification code must be 6 digits')
+      .regex(/^\d{6}$/, 'Verification code must be numeric')
+      .trim(),
+  }),
+};
+export type VerifyEmailSchema = {
+  body: z.infer<typeof verifyEmailSchema.body>;
 };

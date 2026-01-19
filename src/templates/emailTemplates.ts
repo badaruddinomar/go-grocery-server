@@ -20,7 +20,7 @@ export const verifyEmailTemplate = (verificationCode: string) => {
     <p>Enter this code on the verification page to complete your registration.</p>
     <p>This code will expire in 1 minutes for security reasons.</p>
     <p>If you didn't create an account with us, please ignore this email.</p>
-    <p>Best regards,<br>Tohori foods Team</p>
+    <p>Best regards,<br>Go Grocery</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
     <p>This is an automated message, please do not reply to this email.</p>
@@ -54,7 +54,7 @@ export const forgotPasswordEmailTemplate = (forgotPasswordCode: string) => {
       
     </div>
     <p>This code will expire in 1 minutes for security reasons.</p>
-    <p>Best regards,<br>Tohori foods App Team</p>
+    <p>Best regards,<br>Go Grocery App Team</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
     <p>This is an automated message, please do not reply to this email.</p>

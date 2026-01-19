@@ -8,6 +8,7 @@ import { RegisterSchema } from './auth.dto';
 import redis from '@/config/redis.config';
 import logger from '@/utils/logger';
 
+// Service to handle user registration
 export const registerUserService = async (payload: RegisterSchema['body']) => {
   const { email, name, password, phone, address } = payload;
 
@@ -76,4 +77,33 @@ export const registerUserService = async (payload: RegisterSchema['body']) => {
     // 7. Everything succeeded
     return user;
   });
+};
+
+// Service to handle email verification
+export const verifyEmailService = async (email: string, code: string) => {
+  const redisKey = `verify-email:${email}`;
+
+  // 1. Get code from Redis
+  const storedCode = await redis.get(redisKey);
+
+  if (!storedCode) {
+    throw new AppError(
+      'Verification code expired or not found',
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  // 2. Compare codes
+  if (storedCode !== code) {
+    throw new AppError('Invalid verification code', httpStatus.BAD_REQUEST);
+  }
+
+  // 3. Update user as verified
+  await prisma.user.update({
+    where: { email },
+    data: { isVerified: true },
+  });
+
+  // 4. Delete code from Redis
+  await redis.del(redisKey);
 };
