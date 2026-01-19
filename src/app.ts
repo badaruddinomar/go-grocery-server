@@ -33,11 +33,8 @@ app.use(rateLimiter(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
 schedulars();
 
 // routes--
-app.get('/', (_req, res) => {
-  res.send('Hello World!');
-});
 app.use('/api/v1/auth', authRoutes);
-// app.use('/api/v1/users', userRoutes);
+
 // Health check route
 app.get('/health', (_req: Request, res: Response) => {
   sendResponse(res, {
