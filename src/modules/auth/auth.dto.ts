@@ -39,3 +39,15 @@ export const verifyEmailSchema = {
 export type VerifyEmailSchema = {
   body: z.infer<typeof verifyEmailSchema.body>;
 };
+
+// DTO for Resend verification code
+export const resendCodeSchema = {
+  body: z.object({
+    email: z
+      .email({ message: 'Invalid email format' })
+      .transform((val) => val.trim().toLowerCase()),
+  }),
+};
+export type ResendCodeSchema = {
+  body: z.infer<typeof resendCodeSchema.body>;
+};

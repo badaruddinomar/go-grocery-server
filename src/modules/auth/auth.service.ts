@@ -107,3 +107,53 @@ export const verifyEmailService = async (email: string, code: string) => {
   // 4. Delete code from Redis
   await redis.del(redisKey);
 };
+
+// Service to handle resending verification code
+export const resendVerificationCodeService = async (email: string) => {
+  // 1. Check if user exists
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
+  }
+
+  if (user.isVerified) {
+    throw new AppError('Email is already verified', httpStatus.BAD_REQUEST);
+  }
+
+  // 2. Generate new verification code
+  const verificationCode = Math.floor(
+    100000 + Math.random() * 900000,
+  ).toString();
+
+  // 3. Store new code in Redis
+  const redisKey = `verify-email:${email}`;
+
+  try {
+    await redis.set(redisKey, verificationCode, 'EX', 60);
+  } catch (error) {
+    logger.error(`Failed to store verification code in Redis: ${error}`);
+    throw new AppError(
+      'Failed to store verification code',
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  // 4. Send email
+  try {
+    await sendEmail({
+      reciverEmail: email,
+      subject: 'Verify your email',
+      body: verifyEmailTemplate(verificationCode),
+    });
+  } catch (error) {
+    logger.error(`Failed to send verification email: ${error}`);
+    await redis.del(redisKey);
+    throw new AppError(
+      'Failed to send verification email',
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+};

@@ -4,6 +4,7 @@ import asyncHandler from '@/utils/asyncHandler';
 import sendResponse from '@/utils/sendResponse';
 import {
   registerUserService,
+  resendVerificationCodeService,
   verifyEmailService,
 } from '@/modules/auth/auth.service';
 import { RegisterSchema } from '@/modules/auth/auth.dto';
@@ -33,6 +34,20 @@ export const verifyEmail: RequestHandler = asyncHandler(
       success: true,
       statusCode: httpStatus.OK,
       message: 'Email verified successfully.',
+    });
+  },
+);
+
+// Controller to handle resending verification code
+export const resendVerificationCode: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    await resendVerificationCodeService(email);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'Verification code resent successfully.',
     });
   },
 );
