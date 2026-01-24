@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import asyncHandler from '@/utils/asyncHandler';
 import sendResponse from '@/utils/sendResponse';
 import {
+  loginUserService,
   registerUserService,
   resendVerificationCodeService,
   verifyEmailService,
@@ -10,7 +11,7 @@ import {
 import { RegisterSchema } from '@/modules/auth/auth.dto';
 
 // Controller to handle user registration
-export const register: RequestHandler = asyncHandler(
+export const registerUserController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const user = await registerUserService(req.body as RegisterSchema['body']);
 
@@ -24,11 +25,11 @@ export const register: RequestHandler = asyncHandler(
 );
 
 // Controller to handle email verification.
-export const verifyEmail: RequestHandler = asyncHandler(
+export const verifyEmailController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { email, code } = req.body;
 
-    await verifyEmailService(email, code);
+    await verifyEmailService({ email, code });
 
     sendResponse(res, {
       success: true,
@@ -39,7 +40,7 @@ export const verifyEmail: RequestHandler = asyncHandler(
 );
 
 // Controller to handle resending verification code
-export const resendVerificationCode: RequestHandler = asyncHandler(
+export const resendVerificationCodeController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
 
@@ -48,6 +49,26 @@ export const resendVerificationCode: RequestHandler = asyncHandler(
       success: true,
       statusCode: httpStatus.OK,
       message: 'Verification code resent successfully.',
+    });
+  },
+);
+
+// Controller to handle user login
+export const loginUserController: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    const result = await loginUserService({ email, password });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'User logged in successfully.',
+      data: result.user,
+      meta: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
     });
   },
 );

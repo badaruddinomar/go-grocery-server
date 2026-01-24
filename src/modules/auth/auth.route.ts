@@ -1,11 +1,13 @@
 import express from 'express';
 import {
-  register,
-  resendVerificationCode,
-  verifyEmail,
+  loginUserController,
+  registerUserController,
+  resendVerificationCodeController,
+  verifyEmailController,
 } from '@/modules/auth/auth.controller';
 import {
-  registerSchema,
+  loginUserSchema,
+  registerUserSchema,
   resendCodeSchema,
   verifyEmailSchema,
 } from '@/modules/auth/auth.dto';
@@ -17,15 +19,20 @@ const router = express.Router();
 router.post(
   '/register',
   rateLimiter(1, 1 * 60 * 1000),
-  validator(registerSchema),
-  register,
+  validator(registerUserSchema),
+  registerUserController,
 );
-router.post('/verify-email', validator(verifyEmailSchema), verifyEmail);
+router.post(
+  '/verify-email',
+  validator(verifyEmailSchema),
+  verifyEmailController,
+);
 router.post(
   '/resend-code',
   rateLimiter(1, 1 * 60 * 1000),
   validator(resendCodeSchema),
-  resendVerificationCode,
+  resendVerificationCodeController,
 );
+router.post('/login', validator(loginUserSchema), loginUserController);
 
 export default router;

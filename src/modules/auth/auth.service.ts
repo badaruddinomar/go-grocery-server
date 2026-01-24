@@ -1,15 +1,27 @@
+import {
+  VerifyEmailSchema,
+  RegisterSchema,
+  LoginSchema,
+  ResendCodeSchema,
+} from '@/modules/auth/auth.dto';
 import bcryptjs from 'bcryptjs';
 import httpStatus from 'http-status';
 import { prisma } from '@/utils/prismaClient';
 import { AppError } from '@/utils/appError';
 import sendEmail from '@/utils/sendEmail';
 import { verifyEmailTemplate } from '@/templates/emailTemplates';
-import { RegisterSchema } from './auth.dto';
 import redis from '@/config/redis.config';
 import logger from '@/utils/logger';
+import { generateToken } from '@/utils/generateToken';
+import {
+  UserLoginServiceResult,
+  UserWithoutPassword,
+} from '@/modules/auth/auth.interface';
 
 // Service to handle user registration
-export const registerUserService = async (payload: RegisterSchema['body']) => {
+export const registerUserService = async (
+  payload: RegisterSchema['body'],
+): Promise<UserWithoutPassword> => {
   const { email, name, password, phone, address } = payload;
 
   return await prisma.$transaction(async (tx) => {
@@ -80,7 +92,10 @@ export const registerUserService = async (payload: RegisterSchema['body']) => {
 };
 
 // Service to handle email verification
-export const verifyEmailService = async (email: string, code: string) => {
+export const verifyEmailService = async (
+  payload: VerifyEmailSchema['body'],
+): Promise<void> => {
+  const { email, code } = payload;
   const redisKey = `verify-email:${email}`;
 
   // 1. Get code from Redis
@@ -109,7 +124,10 @@ export const verifyEmailService = async (email: string, code: string) => {
 };
 
 // Service to handle resending verification code
-export const resendVerificationCodeService = async (email: string) => {
+export const resendVerificationCodeService = async (
+  payload: ResendCodeSchema['body'],
+): Promise<void> => {
+  const { email } = payload;
   // 1. Check if user exists
   const user = await prisma.user.findUnique({
     where: { email },
@@ -156,4 +174,40 @@ export const resendVerificationCodeService = async (email: string) => {
       httpStatus.INTERNAL_SERVER_ERROR,
     );
   }
+};
+
+// Service to handle user login
+export const loginUserService = async (
+  payload: LoginSchema['body'],
+): Promise<UserLoginServiceResult> => {
+  const { email, password } = payload;
+
+  // 1. Find user by email
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new AppError('Invalid credentials', httpStatus.UNAUTHORIZED);
+  }
+
+  // 2. Check if email is verified
+  if (!user.isVerified) {
+    throw new AppError('Please verify your email.', httpStatus.UNAUTHORIZED);
+  }
+
+  // 3. Compare passwords
+  const isPasswordValid = await bcryptjs.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new AppError('Invalid email or password', httpStatus.UNAUTHORIZED);
+  }
+
+  // 4. Generate access token
+  const accessToken = generateToken(user, 900); // 15 minutes
+  const refreshToken = generateToken(user, 604800); // 7 days
+  // 5. Omit password from user object
+  const { password: _, ...userWithoutPassword } = user;
+  // send response data
+  return { user: userWithoutPassword, accessToken, refreshToken };
 };

@@ -1,7 +1,7 @@
 import z from 'zod';
 
 // DTO for user registration
-export const registerSchema = {
+export const registerUserSchema = {
   body: z.object({
     email: z
       .email({ message: 'Invalid email format' })
@@ -20,7 +20,7 @@ export const registerSchema = {
   }),
 };
 export type RegisterSchema = {
-  body: z.infer<typeof registerSchema.body>;
+  body: z.infer<typeof registerUserSchema.body>;
 };
 
 // DTO for email verification
@@ -50,4 +50,17 @@ export const resendCodeSchema = {
 };
 export type ResendCodeSchema = {
   body: z.infer<typeof resendCodeSchema.body>;
+};
+
+// DTO for user login
+export const loginUserSchema = {
+  body: z.object({
+    email: z
+      .email({ message: 'Invalid email format' })
+      .transform((val) => val.trim().toLowerCase()),
+    password: z.string().min(1, 'Password is required').trim(),
+  }),
+};
+export type LoginSchema = {
+  body: z.infer<typeof loginUserSchema.body>;
 };
