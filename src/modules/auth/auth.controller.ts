@@ -80,7 +80,7 @@ export const forgotPasswordController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
 
-    await forgotPasswordService(email);
+    await forgotPasswordService({ email });
 
     sendResponse(res, {
       success: true,
