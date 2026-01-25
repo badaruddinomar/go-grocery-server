@@ -336,7 +336,8 @@ export const refreshTokenService = async (
     const newRefreshToken = generateToken(user, 604800); // 7 days
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
-  } catch (error) {
+  } catch (err) {
+    logger.error(`Failed to refresh token: ${err}`);
     throw new AppError('Invalid refresh token', httpStatus.UNAUTHORIZED);
   }
 };
