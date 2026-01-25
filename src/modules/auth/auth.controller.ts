@@ -7,6 +7,7 @@ import {
   loginUserService,
   registerUserService,
   resendVerificationCodeService,
+  resetPasswordService,
   verifyEmailService,
 } from '@/modules/auth/auth.service';
 import { RegisterSchema } from '@/modules/auth/auth.dto';
@@ -85,6 +86,21 @@ export const forgotPasswordController: RequestHandler = asyncHandler(
       success: true,
       statusCode: httpStatus.OK,
       message: 'Password reset link sent successfully.',
+    });
+  },
+);
+
+// Controller to handle reset password
+export const resetPasswordController: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email, code, newPassword } = req.body;
+
+    await resetPasswordService({ email, code, newPassword });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'Password reset successfully.',
     });
   },
 );

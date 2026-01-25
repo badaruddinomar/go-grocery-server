@@ -3,6 +3,8 @@ import {
   RegisterSchema,
   LoginSchema,
   ResendCodeSchema,
+  ResetPasswordSchema,
+  ForgotPasswordSchema,
 } from '@/modules/auth/auth.dto';
 import bcryptjs from 'bcryptjs';
 import httpStatus from 'http-status';
@@ -216,7 +218,10 @@ export const loginUserService = async (
 };
 
 // Service to handle forgot password
-export const forgotPasswordService = async (email: string): Promise<void> => {
+export const forgotPasswordService = async (
+  payload: ForgotPasswordSchema['body'],
+): Promise<void> => {
+  const { email } = payload;
   // 1. Check if user exists
   const user = await prisma.user.findUnique({
     where: { email },
@@ -257,4 +262,40 @@ export const forgotPasswordService = async (email: string): Promise<void> => {
       httpStatus.INTERNAL_SERVER_ERROR,
     );
   }
+};
+
+// Service to handle reset password
+export const resetPasswordService = async (
+  payload: ResetPasswordSchema['body'],
+): Promise<void> => {
+  const { email, code, newPassword } = payload;
+  const redisKey = `forgot-password:${email}`;
+
+  // 1. Get reset code from Redis
+  const storedCode = await redis.get(redisKey);
+
+  if (!storedCode) {
+    throw new AppError(
+      'Reset code expired or not found',
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  // 2. Compare codes
+  if (storedCode !== code) {
+    throw new AppError('Invalid reset code', httpStatus.BAD_REQUEST);
+  }
+
+  // 3. Hash new password
+  const salt = await bcryptjs.genSalt(10);
+  const hashedPassword = await bcryptjs.hash(newPassword, salt);
+
+  // 4. Update user's password
+  await prisma.user.update({
+    where: { email },
+    data: { password: hashedPassword },
+  });
+
+  // 5. Delete reset code from Redis
+  await redis.del(redisKey);
 };

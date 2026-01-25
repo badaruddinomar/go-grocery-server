@@ -76,3 +76,24 @@ export const forgotPasswordSchema = {
 export type ForgotPasswordSchema = {
   body: z.infer<typeof forgotPasswordSchema.body>;
 };
+
+// DTO for Reset password
+export const resetPasswordSchema = {
+  body: z.object({
+    email: z
+      .email({ message: 'Invalid email format' })
+      .transform((val) => val.trim().toLowerCase()),
+    code: z
+      .string()
+      .length(6, 'Forgot password code must be 6 digits')
+      .regex(/^\d{6}$/, 'Forgot password code must be numeric')
+      .trim(),
+    newPassword: z
+      .string()
+      .min(6, 'New password must be at least 6 characters long')
+      .trim(),
+  }),
+};
+export type ResetPasswordSchema = {
+  body: z.infer<typeof resetPasswordSchema.body>;
+};

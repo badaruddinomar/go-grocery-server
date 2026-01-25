@@ -4,6 +4,7 @@ import {
   loginUserController,
   registerUserController,
   resendVerificationCodeController,
+  resetPasswordController,
   verifyEmailController,
 } from '@/modules/auth/auth.controller';
 import {
@@ -11,6 +12,7 @@ import {
   loginUserSchema,
   registerUserSchema,
   resendCodeSchema,
+  resetPasswordSchema,
   verifyEmailSchema,
 } from '@/modules/auth/auth.dto';
 import validator from '@/middlewares/validator';
@@ -41,6 +43,11 @@ router.post(
   rateLimiter(1, 1 * 60 * 1000),
   validator(forgotPasswordSchema),
   forgotPasswordController,
+);
+router.post(
+  '/reset-password',
+  validator(resetPasswordSchema),
+  resetPasswordController,
 );
 
 export default router;
