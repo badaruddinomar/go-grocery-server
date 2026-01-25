@@ -1,11 +1,13 @@
 import express from 'express';
 import {
+  forgotPasswordController,
   loginUserController,
   registerUserController,
   resendVerificationCodeController,
   verifyEmailController,
 } from '@/modules/auth/auth.controller';
 import {
+  forgotPasswordSchema,
   loginUserSchema,
   registerUserSchema,
   resendCodeSchema,
@@ -34,5 +36,11 @@ router.post(
   resendVerificationCodeController,
 );
 router.post('/login', validator(loginUserSchema), loginUserController);
+router.post(
+  '/forgot-password',
+  rateLimiter(1, 1 * 60 * 1000),
+  validator(forgotPasswordSchema),
+  forgotPasswordController,
+);
 
 export default router;

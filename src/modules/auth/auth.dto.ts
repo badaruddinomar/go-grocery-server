@@ -64,3 +64,15 @@ export const loginUserSchema = {
 export type LoginSchema = {
   body: z.infer<typeof loginUserSchema.body>;
 };
+
+// DTO for Forgot password
+export const forgotPasswordSchema = {
+  body: z.object({
+    email: z
+      .email({ message: 'Invalid email format' })
+      .transform((val) => val.trim().toLowerCase()),
+  }),
+};
+export type ForgotPasswordSchema = {
+  body: z.infer<typeof forgotPasswordSchema.body>;
+};

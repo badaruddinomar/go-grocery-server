@@ -9,7 +9,10 @@ import httpStatus from 'http-status';
 import { prisma } from '@/utils/prismaClient';
 import { AppError } from '@/utils/appError';
 import sendEmail from '@/utils/sendEmail';
-import { verifyEmailTemplate } from '@/templates/emailTemplates';
+import {
+  forgotPasswordEmailTemplate,
+  verifyEmailTemplate,
+} from '@/templates/emailTemplates';
 import redis from '@/config/redis.config';
 import logger from '@/utils/logger';
 import { generateToken } from '@/utils/generateToken';
@@ -210,4 +213,48 @@ export const loginUserService = async (
   const { password: _, ...userWithoutPassword } = user;
   // send response data
   return { user: userWithoutPassword, accessToken, refreshToken };
+};
+
+// Service to handle forgot password
+export const forgotPasswordService = async (email: string): Promise<void> => {
+  // 1. Check if user exists
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
+  }
+
+  // 2. Generate password reset code
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // 3. Store reset code in Redis
+  const redisKey = `forgot-password:${email}`;
+
+  try {
+    await redis.set(redisKey, resetCode, 'EX', 60); // Expires in 10 minutes
+  } catch (error) {
+    logger.error(`Failed to store reset code in Redis: ${error}`);
+    throw new AppError(
+      'Failed to store reset code',
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  // 4. Send email with reset code
+  try {
+    await sendEmail({
+      reciverEmail: email,
+      subject: 'Password Reset Code',
+      body: forgotPasswordEmailTemplate(resetCode),
+    });
+  } catch (error) {
+    logger.error(`Failed to send password reset email: ${error}`);
+    await redis.del(redisKey);
+    throw new AppError(
+      'Failed to send password reset email',
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
 };

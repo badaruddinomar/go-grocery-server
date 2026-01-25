@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import asyncHandler from '@/utils/asyncHandler';
 import sendResponse from '@/utils/sendResponse';
 import {
+  forgotPasswordService,
   loginUserService,
   registerUserService,
   resendVerificationCodeService,
@@ -69,6 +70,21 @@ export const loginUserController: RequestHandler = asyncHandler(
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
       },
+    });
+  },
+);
+
+// Controller to handle forgot password
+export const forgotPasswordController: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    await forgotPasswordService(email);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'Password reset link sent successfully.',
     });
   },
 );
