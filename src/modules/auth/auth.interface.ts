@@ -7,3 +7,8 @@ export interface UserLoginServiceResult {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface RefreshTokenServiceResult {
+  accessToken: string;
+  refreshToken: string;
+}

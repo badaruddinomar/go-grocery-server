@@ -2,6 +2,7 @@ import express from 'express';
 import {
   forgotPasswordController,
   loginUserController,
+  refreshTokenController,
   registerUserController,
   resendVerificationCodeController,
   resetPasswordController,
@@ -10,6 +11,7 @@ import {
 import {
   forgotPasswordSchema,
   loginUserSchema,
+  refreshTokenSchema,
   registerUserSchema,
   resendCodeSchema,
   resetPasswordSchema,
@@ -48,6 +50,12 @@ router.post(
   '/reset-password',
   validator(resetPasswordSchema),
   resetPasswordController,
+);
+
+router.post(
+  '/refresh-token',
+  validator(refreshTokenSchema),
+  refreshTokenController,
 );
 
 export default router;

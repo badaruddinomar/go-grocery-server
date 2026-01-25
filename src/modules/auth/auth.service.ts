@@ -5,6 +5,7 @@ import {
   ResendCodeSchema,
   ResetPasswordSchema,
   ForgotPasswordSchema,
+  RefreshTokenSchema,
 } from '@/modules/auth/auth.dto';
 import bcryptjs from 'bcryptjs';
 import httpStatus from 'http-status';
@@ -19,9 +20,13 @@ import redis from '@/config/redis.config';
 import logger from '@/utils/logger';
 import { generateToken } from '@/utils/generateToken';
 import {
+  RefreshTokenServiceResult,
   UserLoginServiceResult,
   UserWithoutPassword,
 } from '@/modules/auth/auth.interface';
+import envConfig from '@/config/env.config';
+import { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 // Service to handle user registration
 export const registerUserService = async (
@@ -298,4 +303,40 @@ export const resetPasswordService = async (
 
   // 5. Delete reset code from Redis
   await redis.del(redisKey);
+};
+
+// Service to handle refresh token
+export const refreshTokenService = async (
+  payload: RefreshTokenSchema['body'],
+): Promise<RefreshTokenServiceResult> => {
+  const { refreshToken } = payload;
+
+  try {
+    const decodedData = jwt.verify(
+      refreshToken,
+      envConfig.jwt_secret,
+    ) as JwtPayload;
+
+    const user = await prisma.user.findUnique({
+      where: { userId: decodedData?.userId },
+    });
+
+    if (!user) {
+      throw new AppError(
+        'User no longer exists. Please login again.',
+        httpStatus.UNAUTHORIZED,
+      );
+    }
+
+    if (!user.isVerified) {
+      throw new AppError('Please verify your email.', httpStatus.UNAUTHORIZED);
+    }
+
+    const newAccessToken = generateToken(user, 900); // 15 minutes
+    const newRefreshToken = generateToken(user, 604800); // 7 days
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  } catch (error) {
+    throw new AppError('Invalid refresh token', httpStatus.UNAUTHORIZED);
+  }
 };

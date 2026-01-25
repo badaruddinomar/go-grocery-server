@@ -5,6 +5,7 @@ import sendResponse from '@/utils/sendResponse';
 import {
   forgotPasswordService,
   loginUserService,
+  refreshTokenService,
   registerUserService,
   resendVerificationCodeService,
   resetPasswordService,
@@ -101,6 +102,22 @@ export const resetPasswordController: RequestHandler = asyncHandler(
       success: true,
       statusCode: httpStatus.OK,
       message: 'Password reset successfully.',
+    });
+  },
+);
+
+// Controller to handle refresh token
+export const refreshTokenController: RequestHandler = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { refreshToken } = req.body;
+
+    const result = await refreshTokenService({ refreshToken });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'Token refreshed successfully.',
+      data: result,
     });
   },
 );

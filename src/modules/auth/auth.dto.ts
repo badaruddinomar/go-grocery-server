@@ -97,3 +97,13 @@ export const resetPasswordSchema = {
 export type ResetPasswordSchema = {
   body: z.infer<typeof resetPasswordSchema.body>;
 };
+
+// DTO for refresh token
+export const refreshTokenSchema = {
+  body: z.object({
+    refreshToken: z.string().min(1, 'Refresh token is required').trim(),
+  }),
+};
+export type RefreshTokenSchema = {
+  body: z.infer<typeof refreshTokenSchema.body>;
+};

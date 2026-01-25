@@ -11,7 +11,7 @@ export const authMiddleware: RequestHandler = async (
   _res: Response,
   next: NextFunction,
 ) => {
-  const token = req.cookies.token;
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     throw new AppError(
@@ -23,7 +23,7 @@ export const authMiddleware: RequestHandler = async (
   const decodedData = jwt.verify(token, envConfig.jwt_secret) as JwtPayload;
 
   const user = await prisma.user.findUnique({
-    where: { id: decodedData?.userId },
+    where: { userId: decodedData?.userId },
   });
 
   if (!user) {
