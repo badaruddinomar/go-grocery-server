@@ -4,9 +4,14 @@ import {
   deleteUserService,
   getUserService,
   getUsersService,
+  updateUserService,
 } from '@/modules/user/user.service';
 import asyncHandler from '@/utils/asyncHandler';
-import { GetUserByIdSchema, GetUsersSchema } from '@/modules/user/user.dto';
+import {
+  GetUserByIdSchema,
+  GetUsersSchema,
+  UpdateUserSchema,
+} from '@/modules/user/user.dto';
 import { UserWithoutPassword } from '@/modules/user/user.interface';
 
 export const getUsersController = asyncHandler(
@@ -46,6 +51,28 @@ export const getUserController = asyncHandler(
       success: true,
       message: 'User retrieved successfully',
       data: user,
+    });
+  },
+);
+
+// Update user controller
+export const updateUserController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const params = req.params as unknown as UpdateUserSchema['params'];
+    const updateData = req.body as UpdateUserSchema['body'];
+    const user = req.user;
+
+    if (user?.userId !== params.id) {
+      throw new Error('You are not permitted to update this user');
+    }
+
+    const updatedUser = await updateUserService(params, updateData);
+
+    sendResponse<UserWithoutPassword>(res, {
+      statusCode: 200,
+      success: true,
+      message: 'User updated successfully',
+      data: updatedUser,
     });
   },
 );

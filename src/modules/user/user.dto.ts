@@ -23,6 +23,26 @@ export type GetUserByIdSchema = {
   params: z.infer<typeof getUserByIdSchema.params>;
 };
 
+// Update user DTO
+export const updateUserSchema = {
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
+  body: z.object({
+    name: z.string().trim().min(2).max(100).optional(),
+    phone: z
+      .string()
+      .regex(/^(?:\+8801|01)[3-9]\d{8}$/, 'Invalid phone number')
+      .trim()
+      .optional(),
+    address: z.string().min(1, 'Address is required').trim().optional(),
+  }),
+};
+export type UpdateUserSchema = {
+  params: z.infer<typeof updateUserSchema.params>;
+  body: z.infer<typeof updateUserSchema.body>;
+};
+
 // Get user by ID DTO
 export const deleteUserSchema = {
   params: z.object({

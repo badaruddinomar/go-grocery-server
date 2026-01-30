@@ -60,6 +60,30 @@ export const getUserService = async (query: GetUserByIdSchema['params']) => {
   return user;
 };
 
+// Update user service
+export const updateUserService = async (
+  param: GetUserByIdSchema['params'],
+  updateData: Partial<Prisma.UserUpdateInput>,
+) => {
+  const { id } = param;
+
+  const user = await prisma.user.findUnique({
+    where: { userId: id },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { userId: id },
+    data: updateData,
+    omit: { password: true },
+  });
+
+  return updatedUser;
+};
+
 //  Delete user service
 export const deleteUserService = async (query: GetUserByIdSchema['params']) => {
   const { id } = query;

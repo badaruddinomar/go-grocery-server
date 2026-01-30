@@ -4,11 +4,13 @@ import {
   deleteUserSchema,
   getUserByIdSchema,
   getUsersSchema,
+  updateUserSchema,
 } from '@/modules/user/user.dto';
 import {
   deleteUserController,
   getUserController,
   getUsersController,
+  updateUserController,
 } from '@/modules/user/user.controller';
 import { authorizeRoles } from '@/middlewares/roleGuard';
 import { UserRole } from '@/generated/prisma';
@@ -29,6 +31,19 @@ router.get(
   authorizeRoles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CUSTOMER),
   validator(getUserByIdSchema),
   getUserController,
+);
+
+router.patch(
+  '/:id',
+  authMiddleware,
+  authorizeRoles(
+    UserRole.CUSTOMER,
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    UserRole.SUPPORT,
+  ),
+  validator(updateUserSchema),
+  updateUserController,
 );
 
 router.delete(
