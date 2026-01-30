@@ -13,6 +13,7 @@ import envConfig from '@/config/env.config';
 import { globalErrorHandler } from '@/middlewares/globalErrorHandler';
 import { schedulars } from '@/scehdulars';
 import authRoutes from '@/modules/auth/auth.route';
+import userRoutes from '@/modules/user/user.route';
 
 const app: Application = express();
 const corsOptions = {
@@ -34,6 +35,7 @@ schedulars();
 
 // routes--
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
 
 // Health check route
 app.get('/health', (_req: Request, res: Response) => {

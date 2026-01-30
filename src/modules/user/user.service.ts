@@ -1,5 +1,5 @@
 import { AppError } from '@/utils/appError';
-import { GetUsersSchema } from '@/modules/user/user.dto';
+import { GetUserByIdSchema, GetUsersSchema } from '@/modules/user/user.dto';
 import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/utils/prismaClient';
 import { GetUsersServiceResult } from '@/modules/user/user.interface';
@@ -42,4 +42,20 @@ export const getUsersService = async (
     limit: parseInt(limit.toString()),
     currentPage: parseInt(page.toString()),
   };
+};
+
+// Get user by ID service (to be implemented)
+export const getUserService = async (query: GetUserByIdSchema['params']) => {
+  const { id } = query;
+
+  const user = await prisma.user.findUnique({
+    where: { userId: id },
+    omit: { password: true },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  return user;
 };

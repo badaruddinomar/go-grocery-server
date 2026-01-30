@@ -12,3 +12,13 @@ export const getUsersSchema = {
 export type GetUsersSchema = {
   query: z.infer<typeof getUsersSchema.query>;
 };
+
+// Get user by ID DTO
+export const getUserByIdSchema = {
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
+};
+export type GetUserByIdSchema = {
+  params: z.infer<typeof getUserByIdSchema.params>;
+};

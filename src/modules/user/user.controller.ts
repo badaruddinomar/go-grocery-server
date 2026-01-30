@@ -1,8 +1,9 @@
 import sendResponse from '@/utils/sendResponse';
 import { Request, Response } from 'express';
-import { getUsersService } from '@/modules/user/user.service';
+import { getUserService, getUsersService } from '@/modules/user/user.service';
 import asyncHandler from '@/utils/asyncHandler';
-import { GetUsersSchema } from './user.dto';
+import { GetUserByIdSchema, GetUsersSchema } from '@/modules/user/user.dto';
+import { UserWithoutPassword } from '@/modules/user/user.interface';
 
 export const getUsersController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -12,7 +13,7 @@ export const getUsersController = asyncHandler(
 
     const result = await getUsersService({ page, limit, sort, search });
 
-    sendResponse(res, {
+    sendResponse<UserWithoutPassword[]>(res, {
       statusCode: 200,
       success: true,
       message: 'Users retrieved successfully',
@@ -25,6 +26,22 @@ export const getUsersController = asyncHandler(
         hasNextPage: result.currentPage < result.totalPages,
         hasPreviousPage: result.currentPage > 1,
       },
+    });
+  },
+);
+
+// Get user by ID controller (to be implemented)
+export const getUserController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params as unknown as GetUserByIdSchema['params'];
+
+    const user = await getUserService({ id });
+
+    sendResponse<UserWithoutPassword>(res, {
+      statusCode: 200,
+      success: true,
+      message: 'User retrieved successfully',
+      data: user,
     });
   },
 );

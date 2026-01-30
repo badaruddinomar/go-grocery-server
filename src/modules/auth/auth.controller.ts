@@ -12,13 +12,17 @@ import {
   verifyEmailService,
 } from '@/modules/auth/auth.service';
 import { RegisterSchema } from '@/modules/auth/auth.dto';
+import {
+  RefreshTokenServiceResult,
+  UserWithoutPassword,
+} from '@/modules/auth/auth.interface';
 
 // Controller to handle user registration
 export const registerUserController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const user = await registerUserService(req.body as RegisterSchema['body']);
 
-    sendResponse(res, {
+    sendResponse<UserWithoutPassword>(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: 'User registered successfully. Verification code sent.',
@@ -63,7 +67,7 @@ export const loginUserController: RequestHandler = asyncHandler(
 
     const result = await loginUserService({ email, password });
 
-    sendResponse(res, {
+    sendResponse<UserWithoutPassword>(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: 'User logged in successfully.',
@@ -113,7 +117,7 @@ export const refreshTokenController: RequestHandler = asyncHandler(
 
     const result = await refreshTokenService({ refreshToken });
 
-    sendResponse(res, {
+    sendResponse<RefreshTokenServiceResult>(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: 'Token refreshed successfully.',
