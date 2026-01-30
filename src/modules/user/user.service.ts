@@ -59,3 +59,20 @@ export const getUserService = async (query: GetUserByIdSchema['params']) => {
 
   return user;
 };
+
+//  Delete user service
+export const deleteUserService = async (query: GetUserByIdSchema['params']) => {
+  const { id } = query;
+
+  const user = await prisma.user.findUnique({
+    where: { userId: id },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  await prisma.user.delete({
+    where: { userId: id },
+  });
+};

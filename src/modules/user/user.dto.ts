@@ -22,3 +22,13 @@ export const getUserByIdSchema = {
 export type GetUserByIdSchema = {
   params: z.infer<typeof getUserByIdSchema.params>;
 };
+
+// Get user by ID DTO
+export const deleteUserSchema = {
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
+};
+export type DeleteUserSchema = {
+  params: z.infer<typeof deleteUserSchema.params>;
+};
