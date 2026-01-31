@@ -115,8 +115,9 @@ export const changePasswordService = async (
   if (!user) {
     throw new AppError('User not found', 404);
   }
+  const verifyPassword = await bcryptjs.compare(currentPassword, user.password);
 
-  if (user.password !== currentPassword) {
+  if (!verifyPassword) {
     throw new AppError('Current password is incorrect', 400);
   }
 

@@ -27,6 +27,14 @@ router.get(
   validator(getUsersSchema),
   getUsersController,
 );
+
+router.patch(
+  '/change-password',
+  authMiddleware,
+  validator(changePasswordSchema),
+  changePasswordController,
+);
+
 router.get(
   '/:id',
   authMiddleware,
@@ -54,19 +62,6 @@ router.delete(
   authorizeRoles(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   validator(deleteUserSchema),
   deleteUserController,
-);
-
-router.patch(
-  '/change-password',
-  authMiddleware,
-  authorizeRoles(
-    UserRole.CUSTOMER,
-    UserRole.ADMIN,
-    UserRole.SUPER_ADMIN,
-    UserRole.SUPPORT,
-  ),
-  validator(changePasswordSchema),
-  changePasswordController,
 );
 
 export default router;
