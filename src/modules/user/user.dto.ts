@@ -52,3 +52,19 @@ export const deleteUserSchema = {
 export type DeleteUserSchema = {
   params: z.infer<typeof deleteUserSchema.params>;
 };
+
+// Change password DTO
+export const changePasswordSchema = {
+  body: z.object({
+    currentPassword: z
+      .string()
+      .min(6, 'Current password must be at least 6 characters long'),
+    newPassword: z
+      .string()
+      .min(6, 'New password must be at least 6 characters long'),
+  }),
+};
+
+export type ChangePasswordSchema = {
+  body: z.infer<typeof changePasswordSchema.body>;
+};

@@ -3,6 +3,7 @@ import { GetUserByIdSchema, GetUsersSchema } from '@/modules/user/user.dto';
 import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/utils/prismaClient';
 import { GetUsersServiceResult } from '@/modules/user/user.interface';
+import bcryptjs from 'bcryptjs';
 
 export const getUsersService = async (
   query: GetUsersSchema['query'],
@@ -98,5 +99,32 @@ export const deleteUserService = async (query: GetUserByIdSchema['params']) => {
 
   await prisma.user.delete({
     where: { userId: id },
+  });
+};
+
+// Change password service
+export const changePasswordService = async (
+  userId: number,
+  currentPassword: string,
+  newPassword: string,
+) => {
+  const user = await prisma.user.findUnique({
+    where: { userId },
+  });
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  if (user.password !== currentPassword) {
+    throw new AppError('Current password is incorrect', 400);
+  }
+
+  const salt = await bcryptjs.genSalt(10);
+  newPassword = await bcryptjs.hash(newPassword, salt);
+
+  await prisma.user.update({
+    where: { userId },
+    data: { password: newPassword },
   });
 };

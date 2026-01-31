@@ -1,6 +1,7 @@
 import sendResponse from '@/utils/sendResponse';
 import { Request, Response } from 'express';
 import {
+  changePasswordService,
   deleteUserService,
   getUserService,
   getUsersService,
@@ -8,6 +9,7 @@ import {
 } from '@/modules/user/user.service';
 import asyncHandler from '@/utils/asyncHandler';
 import {
+  ChangePasswordSchema,
   GetUserByIdSchema,
   GetUsersSchema,
   UpdateUserSchema,
@@ -92,3 +94,22 @@ export const deleteUserController = asyncHandler(
     });
   },
 );
+
+// Change password controller
+export const changePasswordController = asyncHandler(async (req, res) => {
+  const userId = req.user?.userId;
+  const { currentPassword, newPassword } =
+    req.body as unknown as ChangePasswordSchema['body'];
+
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+
+  await changePasswordService(userId, currentPassword, newPassword);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Password changed successfully',
+  });
+});

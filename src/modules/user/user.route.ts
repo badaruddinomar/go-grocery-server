@@ -1,12 +1,14 @@
 import validator from '@/middlewares/validator';
 import express from 'express';
 import {
+  changePasswordSchema,
   deleteUserSchema,
   getUserByIdSchema,
   getUsersSchema,
   updateUserSchema,
 } from '@/modules/user/user.dto';
 import {
+  changePasswordController,
   deleteUserController,
   getUserController,
   getUsersController,
@@ -52,6 +54,19 @@ router.delete(
   authorizeRoles(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   validator(deleteUserSchema),
   deleteUserController,
+);
+
+router.patch(
+  '/change-password',
+  authMiddleware,
+  authorizeRoles(
+    UserRole.CUSTOMER,
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+    UserRole.SUPPORT,
+  ),
+  validator(changePasswordSchema),
+  changePasswordController,
 );
 
 export default router;
