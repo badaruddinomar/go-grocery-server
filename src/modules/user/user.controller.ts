@@ -1,5 +1,5 @@
 import sendResponse from '@/utils/sendResponse';
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import {
   changePasswordService,
   deleteUserService,
@@ -19,7 +19,7 @@ import httpStatus from 'http-status';
 import { AppError } from '@/utils/appError';
 
 // Get users controller
-export const getUsersController = asyncHandler(
+export const getUsersController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     // Extract query parameters
     const { page, limit, sort, search } =
@@ -45,7 +45,7 @@ export const getUsersController = asyncHandler(
 );
 
 // Get user by ID controller
-export const getUserController = asyncHandler(
+export const getUserController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as unknown as GetUserByIdSchema['params'];
 
@@ -61,7 +61,7 @@ export const getUserController = asyncHandler(
 );
 
 // Update user controller
-export const updateUserController = asyncHandler(
+export const updateUserController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const params = req.params as unknown as UpdateUserSchema['params'];
     const updateData = req.body as UpdateUserSchema['body'];
@@ -86,7 +86,7 @@ export const updateUserController = asyncHandler(
 );
 
 // Delete user controller
-export const deleteUserController = asyncHandler(
+export const deleteUserController: RequestHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as unknown as GetUserByIdSchema['params'];
 
@@ -102,20 +102,22 @@ export const deleteUserController = asyncHandler(
 );
 
 // Change password controller
-export const changePasswordController = asyncHandler(async (req, res) => {
-  const userId = req.user?.userId;
-  const { currentPassword, newPassword } =
-    req.body as unknown as ChangePasswordSchema['body'];
+export const changePasswordController: RequestHandler = asyncHandler(
+  async (req, res) => {
+    const userId = req.user?.userId;
+    const { currentPassword, newPassword } =
+      req.body as unknown as ChangePasswordSchema['body'];
 
-  if (!userId) {
-    throw new AppError('User not authenticated', httpStatus.UNAUTHORIZED);
-  }
+    if (!userId) {
+      throw new AppError('User not authenticated', httpStatus.UNAUTHORIZED);
+    }
 
-  await changePasswordService(userId, currentPassword, newPassword);
+    await changePasswordService(userId, currentPassword, newPassword);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Password changed successfully',
-  });
-});
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Password changed successfully',
+    });
+  },
+);
