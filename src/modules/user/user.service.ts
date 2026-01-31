@@ -4,6 +4,7 @@ import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/utils/prismaClient';
 import { GetUsersServiceResult } from '@/modules/user/user.interface';
 import bcryptjs from 'bcryptjs';
+import httpStatus from 'http-status';
 
 export const getUsersService = async (
   query: GetUsersSchema['query'],
@@ -55,7 +56,7 @@ export const getUserService = async (query: GetUserByIdSchema['params']) => {
   });
 
   if (!user) {
-    throw new AppError('User not found', 404);
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
   }
 
   return user;
@@ -73,7 +74,7 @@ export const updateUserService = async (
   });
 
   if (!user) {
-    throw new AppError('User not found', 404);
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
   }
 
   const updatedUser = await prisma.user.update({
@@ -94,7 +95,7 @@ export const deleteUserService = async (query: GetUserByIdSchema['params']) => {
   });
 
   if (!user) {
-    throw new AppError('User not found', 404);
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
   }
 
   await prisma.user.delete({
@@ -113,12 +114,12 @@ export const changePasswordService = async (
   });
 
   if (!user) {
-    throw new AppError('User not found', 404);
+    throw new AppError('User not found', httpStatus.NOT_FOUND);
   }
   const verifyPassword = await bcryptjs.compare(currentPassword, user.password);
 
   if (!verifyPassword) {
-    throw new AppError('Current password is incorrect', 400);
+    throw new AppError('Current password is incorrect', httpStatus.BAD_REQUEST);
   }
 
   const salt = await bcryptjs.genSalt(10);

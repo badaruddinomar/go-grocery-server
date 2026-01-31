@@ -15,7 +15,10 @@ import {
   UpdateUserSchema,
 } from '@/modules/user/user.dto';
 import { UserWithoutPassword } from '@/modules/user/user.interface';
+import httpStatus from 'http-status';
+import { AppError } from '@/utils/appError';
 
+// Get users controller
 export const getUsersController = asyncHandler(
   async (req: Request, res: Response) => {
     // Extract query parameters
@@ -25,7 +28,7 @@ export const getUsersController = asyncHandler(
     const result = await getUsersService({ page, limit, sort, search });
 
     sendResponse<UserWithoutPassword[]>(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: 'Users retrieved successfully',
       data: result.data,
@@ -49,7 +52,7 @@ export const getUserController = asyncHandler(
     const user = await getUserService({ id });
 
     sendResponse<UserWithoutPassword>(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: 'User retrieved successfully',
       data: user,
@@ -65,13 +68,16 @@ export const updateUserController = asyncHandler(
     const user = req.user;
 
     if (user?.userId !== params.id) {
-      throw new Error('You are not permitted to update this user');
+      throw new AppError(
+        'You are not authorized to update this user',
+        httpStatus.FORBIDDEN,
+      );
     }
 
     const updatedUser = await updateUserService(params, updateData);
 
     sendResponse<UserWithoutPassword>(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: 'User updated successfully',
       data: updatedUser,
@@ -87,7 +93,7 @@ export const deleteUserController = asyncHandler(
     await deleteUserService({ id });
 
     sendResponse<null>(res, {
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       success: true,
       message: 'User deleted successfully',
       data: null,
@@ -102,13 +108,13 @@ export const changePasswordController = asyncHandler(async (req, res) => {
     req.body as unknown as ChangePasswordSchema['body'];
 
   if (!userId) {
-    throw new Error('User not authenticated');
+    throw new AppError('User not authenticated', httpStatus.UNAUTHORIZED);
   }
 
   await changePasswordService(userId, currentPassword, newPassword);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: 'Password changed successfully',
   });
