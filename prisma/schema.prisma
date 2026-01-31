@@ -61,14 +61,11 @@ model Category {
   categoryId  Int       @id @default(autoincrement())
   name        String    @unique
   image       Image?
-  imageId     Int?
   description String?
   products    Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([categoryId])
 }
 
 model Product {
@@ -83,7 +80,6 @@ model Product {
   reorderLevel             Int             @default(0) // Minimum stock level to trigger reorder
   isSubscription           Boolean         @default(false)
   isPreorder               Boolean         @default(false)
-  isPrivateImages          Boolean         @default(false)
   preorderAvailabilityDate DateTime?
   createdAt                DateTime        @default(now())
   updatedAt                DateTime        @updatedAt
